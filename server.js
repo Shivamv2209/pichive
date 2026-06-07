@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import events_routes from "./routes/events_routes.js";
 import photo_routes from "./routes/photo_routes.js";
+import cors from "cors"
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(cors())
 app.use("/api/events",events_routes);
 app.use("/api/photos",photo_routes);
 app.listen(port,()=>{
