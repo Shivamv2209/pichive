@@ -1,0 +1,41 @@
+from face_model import app
+import cv2
+import numpy as np
+# from numpy import dot
+# from numpy.linalg import norm
+import requests
+import sys
+import json
+
+# def cosine_similarity(a,b):
+#     return dot(a,b)/(norm(a)*norm(b)) 
+
+def url_to_image(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    arr = np.frombuffer(response.content,np.uint8)
+    return cv2.imdecode(arr,cv2.IMREAD_COLOR)
+
+def generate_embeddings(photos):
+    face_embeddings=[]
+    for photo in photos:
+        photo_id = photo["photo_id"]
+        url = photo["url"]
+        img = url_to_image(url)
+        faces = app.get(img)
+        for i,face in enumerate(faces):
+            face_embeddings.append({
+                "photo_id":photo_id,
+                "face_index":i,
+                "embedding":face.embedding.tolist()
+            })
+
+    return face_embeddings
+
+
+photos = json.loads(sys.stdin.read())
+
+print("Generating embeddings...",file=sys.stderr)
+
+result = generate_embeddings(photos)
+print(json.dumps(result))

@@ -1,6 +1,7 @@
 import pool from "../config/db_config.js"
 import {v4 as uuidv4} from "uuid"
 import {putObjectUrl,getObject} from "../utils/s3.js"
+import {spawn} from "child_process"
 
 export const upload_photo = async (req,res)=>{
 
@@ -72,15 +73,56 @@ export const confirm_upload = async (req,res)=>{
                 })
             }
         const event_id = event.rows[0].id;
+        const insertedPhotos = []
         for(const photo of photos){
             let photo_id = photo.photo_id;
             let s3_key = photo.s3_key;
             await pool.query(`insert into photos (id,event_id,s3_key) values
             ($1,$2,$3)`,[photo_id,event_id,s3_key]);
-        } 
 
+            insertedPhotos.push({
+                photo_id:photo_id,
+                s3_key:s3_key
+            })
+        }
+        
+        const new_photos=[]
+        for(const item of insertedPhotos){
+            let photo_id = item.photo_id
+            let s3_key = item.s3_key
+            const url = await getObject(s3_key)
+            new_photos.push({
+                photo_id:photo_id,
+                url:url
+            })
+        }
+
+        const py = spawn('python3',['worker/embeddings.py'])
+        py.stdin.write(JSON.stringify(new_photos))
+        py.stdin.end();
+
+        let output = ""
+
+        py.stdout.on("data",(data)=>{
+            output+=data.toString();
+        })
+
+        py.stderr.on("data",(data)=>{
+            console.error(data.toString())
+        })
+
+        py.on("close",async ()=>{
+            // console.log(output)
+            const embeddings = JSON.parse(output);
+            console.log(embeddings)
+
+            for(const item of embeddings){
+                await pool.query(`insert into face_embeddings (id,photo_id,embeddings,face_index) values
+                ($1,$2,$3,$4)`,[uuidv4(),item.photo_id,item.embedding,item.face_index])
+            }
         return res.status(200).json({
-            message:"all upload done"
+            message:"all upload done",
+        })
         })
     }catch(err){
         return res.status(500).json({
