@@ -1,14 +1,10 @@
 from face_model import app
 import cv2
 import numpy as np
-# from numpy import dot
-# from numpy.linalg import norm
 import requests
 import sys
 import json
 
-# def cosine_similarity(a,b):
-#     return dot(a,b)/(norm(a)*norm(b)) 
 
 def url_to_image(url):
     response = requests.get(url)
