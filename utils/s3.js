@@ -15,7 +15,7 @@ const client = new S3Client({
 
 export const putObjectUrl = async (key,contentType)=>{
     const command = new PutObjectCommand({
-        Bucket:'pichive-images',
+        Bucket:process.env.AWS_BUCKET_NAME,
         Key:key,
         ContentType:contentType
     })
@@ -27,7 +27,7 @@ export const putObjectUrl = async (key,contentType)=>{
 
 const getList = async ()=>{
     const command = new ListObjectsV2Command({
-        Bucket:'pichive-images',
+        Bucket:process.env.AWS_BUCKET_NAME,
         Key:'/event1'
     })
 
@@ -39,7 +39,7 @@ const getList = async ()=>{
 
 export const getObject = async (key)=>{
     const command = new GetObjectCommand({
-        Bucket:'pichive-images',
+        Bucket:process.env.AWS_BUCKET_NAME,
         Key:key
     })
 
