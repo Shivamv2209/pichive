@@ -114,7 +114,6 @@ export const confirm_upload = async (req,res)=>{
         py.on("close",async ()=>{
             // console.log(output)
             const embeddings = JSON.parse(output);
-            console.log(embeddings)
 
             for(const item of embeddings){
                 await pool.query(`insert into face_embeddings (id,photo_id,embeddings,face_index) values

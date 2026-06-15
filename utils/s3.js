@@ -40,7 +40,8 @@ const getList = async ()=>{
 export const getObject = async (key)=>{
     const command = new GetObjectCommand({
         Bucket:process.env.AWS_BUCKET_NAME,
-        Key:key
+        Key:key,
+        ResponseContentDisposition : "attachment; filename=photo.jpg"
     })
 
     const url = await getSignedUrl(client,command);

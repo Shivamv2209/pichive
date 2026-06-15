@@ -56,9 +56,7 @@ export const search_photos = async (req, res) => {
 
     const urls = [];
     py.on("close", async () => {
-      console.log(output);
       const ids = JSON.parse(output);
-      console.log(ids);
 
       for (const id of ids) {
         const result = await pool.query(
@@ -72,7 +70,7 @@ export const search_photos = async (req, res) => {
           get_url: url,
         });
       }
-
+      
       return res.status(200).json({
         message: "urls reached",
         urls,
