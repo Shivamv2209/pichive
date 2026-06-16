@@ -21,10 +21,17 @@ def generate_embeddings(photos):
 
         print(f"Processing photo {photo_id}", file=sys.stderr)
 
+        print("Downloading image...", file=sys.stderr)
+        sys.stderr.flush()
+
         img = url_to_image(url)
+
+        print("Image downloaded", file=sys.stderr)
+        sys.stderr.flush()
 
         if img is None:
             print("Image decode failed", file=sys.stderr)
+            sys.stderr.flush()
             continue
 
         print("Image loaded successfully", file=sys.stderr)
@@ -48,28 +55,39 @@ def generate_embeddings(photos):
 
 
 try:
+    print("Python started", file=sys.stderr)
+    sys.stderr.flush()
+
     raw_input = sys.stdin.read()
 
-    if not raw_input.strip():
-        raise Exception("No input received from Node")
+    print("Input received", file=sys.stderr)
+    sys.stderr.flush()
 
     photos = json.loads(raw_input)
 
+    print(f"Photos count = {len(photos)}", file=sys.stderr)
+    sys.stderr.flush()
+
     print("Generating embeddings...", file=sys.stderr)
+    sys.stderr.flush()
 
     result = generate_embeddings(photos)
 
-    print("About to print JSON", file=sys.stderr)
+    print("About to output JSON", file=sys.stderr)
+    sys.stderr.flush()
+
     print(json.dumps(result), flush=True)
-    print("JSON printed", file=sys.stderr)
+
+    print("JSON output complete", file=sys.stderr)
+    sys.stderr.flush()
 
 except Exception as e:
+
     import traceback
 
     print("PYTHON ERROR:", str(e), file=sys.stderr)
     traceback.print_exc(file=sys.stderr)
 
-    # Send empty JSON so Node doesn't crash on JSON.parse("")
     print("[]", flush=True)
 
     sys.exit(1)
