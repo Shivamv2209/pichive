@@ -25,7 +25,8 @@ export const create_event = async (req, res) => {
     );
 
     if (result.rows.length > 0) {
-      await sendMail(
+      try{
+        await sendMail(
         email,
         "Your PICHIVE Event Has Been Created 🎉",
         `Hello,
@@ -50,6 +51,9 @@ export const create_event = async (req, res) => {
         — Team PICHIVE
         `,
       );
+      }catch(err){
+        console.log("MAIL error",err)
+      }
     }
     
     return res.status(201).json({

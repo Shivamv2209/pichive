@@ -12,10 +12,16 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendMail = async (to,subject,text)=>{
-    await transporter.sendMail({
+   try{
+     await transporter.sendMail({
         from:`"PICHIVE" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         text
     })
+    console.log("Email sent")
+   }catch(err){
+    console.log("Email failed",err);
+    throw err
+   }
 }
