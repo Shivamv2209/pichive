@@ -9,7 +9,7 @@ sys.stderr.flush()
 
 app = FaceAnalysis(
     name="buffalo_l",
-    root="/opt/render/project/src/models"
+    root="/opt/render/project/src"
 )
 
 print("After FaceAnalysis()", file=sys.stderr)
