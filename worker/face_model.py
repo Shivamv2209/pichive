@@ -13,4 +13,10 @@ with open(os.devnull, "w") as f:
             root="/opt/render/project/src/models"
         )
 
+        print("Before prepare()", file=sys.stderr)
+        sys.stderr.flush()
+
         app.prepare(ctx_id=-1)
+
+        print("After prepare()", file=sys.stderr)
+        sys.stderr.flush()
