@@ -30,12 +30,26 @@ def generate_embeddings(photos):
 
 
 try:
-    photos = json.loads(sys.stdin.read())
+    raw_input = sys.stdin.read()
+
+    if not raw_input.strip():
+        raise Exception("No input received from Node")
+
+    photos = json.loads(raw_input)
+
+    print("Generating embeddings...", file=sys.stderr)
+
+    result = generate_embeddings(photos)
+
+    print(json.dumps(result), flush=True)
+
 except Exception as e:
-    print(e, file=sys.stderr)
+    import traceback
+
+    print("PYTHON ERROR:", str(e), file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+
+    # Send empty JSON so Node doesn't crash on JSON.parse("")
+    print("[]", flush=True)
+
     sys.exit(1)
-
-print("Generating embeddings...",file=sys.stderr)
-
-result = generate_embeddings(photos)
-print(json.dumps(result),flush=True)
