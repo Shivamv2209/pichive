@@ -29,9 +29,13 @@ def generate_embeddings(photos):
     return face_embeddings
 
 
-photos = json.loads(sys.stdin.read())
+try:
+    photos = json.loads(sys.stdin.read())
+except Exception as e:
+    print(e, file=sys.stderr)
+    sys.exit(1)
 
 print("Generating embeddings...",file=sys.stderr)
 
 result = generate_embeddings(photos)
-print(json.dumps(result))
+print(json.dumps(result),flush=True)

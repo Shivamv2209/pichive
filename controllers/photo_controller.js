@@ -2,6 +2,8 @@ import pool from "../config/db_config.js"
 import {v4 as uuidv4} from "uuid"
 import {putObjectUrl,getObject} from "../utils/s3.js"
 import {spawn} from "child_process"
+import path from "path"
+import { worker } from "cluster"
 
 export const upload_photo = async (req,res)=>{
 
@@ -97,7 +99,9 @@ export const confirm_upload = async (req,res)=>{
             })
         }
 
-        const py = spawn('python3',['worker/embeddings.py'])
+        const py = spawn('python3',[
+            path.join(process.cwd(),"worker","embeddings.py")
+        ]);
         py.stdin.write(JSON.stringify(new_photos))
         py.stdin.end();
 
@@ -111,8 +115,9 @@ export const confirm_upload = async (req,res)=>{
             console.error(data.toString())
         })
 
-        py.on("close",async ()=>{
-            // console.log(output)
+        py.on("close",async (code)=>{
+            console.log("Python exited with", code);
+            console.log(output)
             const embeddings = JSON.parse(output);
 
             for(const item of embeddings){
