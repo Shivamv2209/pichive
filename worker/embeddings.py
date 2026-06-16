@@ -13,18 +13,36 @@ def url_to_image(url):
     return cv2.imdecode(arr,cv2.IMREAD_COLOR)
 
 def generate_embeddings(photos):
-    face_embeddings=[]
+    face_embeddings = []
+
     for photo in photos:
         photo_id = photo["photo_id"]
         url = photo["url"]
+
+        print(f"Processing photo {photo_id}", file=sys.stderr)
+
         img = url_to_image(url)
+
+        if img is None:
+            print("Image decode failed", file=sys.stderr)
+            continue
+
+        print("Image loaded successfully", file=sys.stderr)
+        print("Before app.get()", file=sys.stderr)
+
         faces = app.get(img)
-        for i,face in enumerate(faces):
+
+        print("After app.get()", file=sys.stderr)
+        print(f"Faces found: {len(faces)}", file=sys.stderr)
+
+        for i, face in enumerate(faces):
             face_embeddings.append({
-                "photo_id":photo_id,
-                "face_index":i,
-                "embedding":face.embedding.tolist()
+                "photo_id": photo_id,
+                "face_index": i,
+                "embedding": face.embedding.tolist()
             })
+
+    print("Finished generate_embeddings()", file=sys.stderr)
 
     return face_embeddings
 
@@ -41,7 +59,9 @@ try:
 
     result = generate_embeddings(photos)
 
+    print("About to print JSON", file=sys.stderr)
     print(json.dumps(result), flush=True)
+    print("JSON printed", file=sys.stderr)
 
 except Exception as e:
     import traceback

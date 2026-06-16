@@ -117,6 +117,10 @@ export const confirm_upload = async (req, res) => {
       console.error(data.toString());
     });
 
+    py.on("exit", code => {
+    console.log("Python exited:", code);
+    });
+
     py.on("close", async (code) => {
       console.log("Python exited with", code);
       console.log(output);
