@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { putObjectUrl, getObject } from "../utils/s3.js";
 import { spawn } from "child_process";
 import path from "path";
-import { worker } from "cluster";
 
 export const upload_photo = async (req, res) => {
   const { event_code } = req.params;
