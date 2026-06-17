@@ -8,7 +8,7 @@ print("Before FaceAnalysis()", file=sys.stderr)
 sys.stderr.flush()
 
 app = FaceAnalysis(
-    name="buffalo_l",
+    name="buffalo_s",
     root="/opt/render/project/src"
 )
 

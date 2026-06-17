@@ -1,9 +1,9 @@
 from insightface.app import FaceAnalysis
 
-print("Downloading buffalo_l model...")
+print("Downloading buffalo_s model...")
 
 app = FaceAnalysis(
-    name="buffalo_l",
+    name="buffalo_s",
     root="/opt/render/project/src"
 )
 
