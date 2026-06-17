@@ -3,13 +3,13 @@ charset-normalizer==3.4.7
 flatbuffers==25.12.19
 idna==3.18
 ImageIO==2.37.3
-insightface==1.0.1
+insightface==0.7.3
 lazy-loader==0.5
 ml_dtypes==0.5.4
 networkx==3.6.1
 numpy==2.4.6
 onnx==1.21.0
-onnxruntime==1.26.0
+onnxruntime==1.18.0
 opencv-python==4.13.0.92
 packaging==26.2
 pillow==12.2.0
