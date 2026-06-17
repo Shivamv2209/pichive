@@ -1,7 +1,11 @@
 FROM python:3.12-bookworm
 
 # Install Node 22
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y \
+    curl \
+    libgl1 \
+    libglib2.0-0
+
 
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
