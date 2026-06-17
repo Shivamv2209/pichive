@@ -4,7 +4,7 @@ print("Downloading buffalo_l model...")
 
 app = FaceAnalysis(
     name="buffalo_l",
-    root="/opt/render/project/src/models"
+    root="/opt/render/project/src"
 )
 
 app.prepare(ctx_id=-1)
