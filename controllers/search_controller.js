@@ -1,6 +1,5 @@
 import pool from "../config/db_config.js";
 import multer from "multer";
-import { spawn } from "child_process";
 import { getObject } from "../utils/s3.js";
 import axios from "axios";
 import dotenv from "dotenv"

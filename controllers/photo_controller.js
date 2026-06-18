@@ -1,7 +1,6 @@
 import pool from "../config/db_config.js";
 import { v4 as uuidv4 } from "uuid";
 import { putObjectUrl, getObject } from "../utils/s3.js";
-import { spawn } from "child_process";
 import path from "path";
 import axios from "axios";
 import dotenv from "dotenv"
