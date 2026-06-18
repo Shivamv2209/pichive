@@ -15,7 +15,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cors({
     origin:[
-        "http://localhost:5173",
+        "https://pichive-front.vercel.app",
     ]
 }))
 app.use("/api/events",events_routes);
