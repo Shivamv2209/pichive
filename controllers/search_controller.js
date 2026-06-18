@@ -2,6 +2,10 @@ import pool from "../config/db_config.js";
 import multer from "multer";
 import { spawn } from "child_process";
 import { getObject } from "../utils/s3.js";
+import axios from "axios";
+import dotenv from "dotenv"
+
+dotenv.config();
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage: storage });
@@ -35,47 +39,33 @@ export const search_photos = async (req, res) => {
       });
     }
 
-    const py = spawn("python3", ["worker/selfie_embeddings.py"]);
-    py.stdin.write(
-      JSON.stringify({
-        selfie: Array.from(selfie.buffer),
-        face_embeddings: face_embeddings,
-      }),
-    );
-    py.stdin.end();
-
-    let output = "";
-
-    py.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    py.stderr.on("data", (data) => {
-      console.error(data.toString());
-    });
-
-    const urls = [];
-    py.on("close", async () => {
-      const ids = JSON.parse(output);
-
-      for (const id of ids) {
-        const result = await pool.query(
-          `select s3_key from photos where id = $1`,
-          [id],
-        );
-        const s3_key = result.rows[0].s3_key;
-
-        const url = await getObject(s3_key);
-        urls.push({
-          get_url: url,
-        });
+    const response = await axios.post(
+      `${process.env.WORKER_URL}/search-selfie`,{
+        selfie:Array.from(selfie.buffer),
+        face_embeddings:face_embeddings
       }
+    )
+
+    let ids = []
+
+    ids = response.data.photo_ids
+
+    const urls = []
+    for(const id of ids){
+      const result = await pool.query(`select s3_key from photos where id=$1`,[id]);
+      const s3_key = result.rows[0].s3_key;
       
-      return res.status(200).json({
-        message: "urls reached",
-        urls,
+      const url = await getObject(s3_key)
+      urls.push({
+        get_url:url,
       });
-    });
+    }
+
+    return res.status(200).json({
+      message:"urls reached",
+      urls
+    })
+    
   } catch (err) {
     return res.status(500).json({
       messaege: "Internal server error",

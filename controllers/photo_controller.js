@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 import { putObjectUrl, getObject } from "../utils/s3.js";
 import { spawn } from "child_process";
 import path from "path";
+import axios from "axios";
+import dotenv from "dotenv"
+
+dotenv.config();
 
 export const upload_photo = async (req, res) => {
   const { event_code } = req.params;
@@ -101,52 +105,29 @@ export const confirm_upload = async (req, res) => {
       });
     }
 
-    const py = spawn("python3", [
-      path.join(process.cwd(), "worker", "embeddings.py"),
-    ]);
-    py.stdin.write(JSON.stringify(new_photos));
-    py.stdin.end();
+    let embeddings = []
+    try{
+    const response = await axios.post(
+      `${process.env.WORKER_URL}/generate-embeddings`,
+      new_photos
+    )
 
-    let output = "";
+    embeddings = response.data.embeddings;
+    for(const item of embeddings){
+      await pool.query(`insert into face_embeddings (id,photo_id,embeddings,face_index) values
+      ($1,$2,$3,$4)`,[uuidv4(),item.photo_id,item.embedding,item.face_index]);
+    }
+    return res.status(200).json({
+      message: "all upload done",
+    })
+    
+    }catch(err){
+      return res.status(500).json({
+        message:"Internal server error"
+      })
+    }
 
-    py.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    py.stderr.on("data", (data) => {
-      console.error(data.toString());
-    });
-
-    py.on("exit", code => {
-    console.log("Python exited:", code);
-    });
-
-    py.on("close", async (code) => {
-      console.log("Python exited with", code);
-      console.log(output);
-      let embeddings = [];
-
-      try {
-        embeddings = JSON.parse(output || "[]");
-      } catch (err) {
-        console.error("JSON parse error:", err);
-        return res.status(500).json({
-          message: "Embedding generation failed",
-        });
-      }
-
-      for (const item of embeddings) {
-        await pool.query(
-          `insert into face_embeddings (id,photo_id,embeddings,face_index) values
-                ($1,$2,$3,$4)`,
-          [uuidv4(), item.photo_id, item.embedding, item.face_index],
-        );
-      }
-      return res.status(200).json({
-        message: "all upload done",
-      });
-    });
-  } catch (err) {
+}catch(err) {
     return res.status(500).json({
       message: "Internal server error",
     });
