@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1063.0",
+    "@aws-sdk/lib-storage": "^3.1073.0",
     "@aws-sdk/s3-request-presigner": "^3.1063.0",
     "axios": "^1.18.0",
     "cors": "^2.8.6",

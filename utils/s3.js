@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import {GetObjectCommand, ListObjectsV2Command, PutObjectCommand, DeleteObjectCommand, S3Client} from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import {Upload} from "@aws-sdk/lib-storage"
 
 dotenv.config();
 
@@ -57,10 +58,17 @@ export const deleteObject = async (key)=>{
 
     await client.send(command);
 }
-// const url = await putObjectUrl(`test.jpg`,'image/jpg');
 
-// console.log(url)
+export const uploadDriveImage = async (stream,key,contentType)=>{
+    const upload = new Upload({
+        client,
+        params:{
+            Bucket:process.env.AWS_BUCKET_NAME,
+            Key:key,
+            Body:stream,
+            ContentType:contentType
+        }
+    });
 
-// await getList();
-// const url = await getObject('event1/images/test.jpg')
-// console.log(url)
+    await upload.done();
+}

@@ -25,3 +25,15 @@ export const lisFiles = async (folderId) =>{
 
     return response.data.files;
 }
+
+export const getfileStream = async (fileId)=>{
+    const respons = await drive.files.get({
+        fileId,
+        alt:"media",
+    },{
+        responseType:"stream",
+    }
+);
+
+return respons.data
+}
