@@ -20,7 +20,7 @@ const drive = google.drive({
 export const lisFiles = async (folderId) =>{
     const response = await drive.files.list({
         q:`'${folderId}' in parents and trashed=false`,
-        fields:"files(id,name,mimeType)",
+        fields:"files(id,name,mimeType,size)",
     });
 
     return response.data.files;
@@ -36,4 +36,13 @@ export const getfileStream = async (fileId)=>{
 );
 
 return respons.data
+}
+
+export const streamToBuffer = async (stream)=>{
+    const chunks =[]
+    for await(const chunk of stream){
+        chunks.push(chunk);
+    }
+
+    return Buffer.concat(chunks);
 }

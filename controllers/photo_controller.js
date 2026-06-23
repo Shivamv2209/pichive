@@ -1,7 +1,6 @@
 import pool from "../config/db_config.js";
 import { v4 as uuidv4 } from "uuid";
 import { putObjectUrl, getObject } from "../utils/s3.js";
-import path from "path";
 import axios from "axios";
 import dotenv from "dotenv"
 
@@ -47,6 +46,7 @@ export const upload_photo = async (req, res) => {
         photo_id,
         upload_url,
         s3_key,
+        google_file_id:null
       });
     }
 
@@ -81,16 +81,22 @@ export const confirm_upload = async (req, res) => {
     for (const photo of photos) {
       let photo_id = photo.photo_id;
       let s3_key = photo.s3_key;
-      await pool.query(
-        `insert into photos (id,event_id,s3_key) values
-            ($1,$2,$3)`,
-        [photo_id, event_id, s3_key],
+      let google_file_id = photo.google_file_id || null;
+      const result = await pool.query(
+        `insert into photos (id,event_id,s3_key,google_file_id) values
+            ($1,$2,$3,$4)
+            on conflict (event_id,google_file_id)
+            do nothing`,
+        [photo_id, event_id, s3_key,google_file_id],
       );
-
-      insertedPhotos.push({
+      if(result.rowCount === 0){
+        continue;
+      }else{
+        insertedPhotos.push({
         photo_id: photo_id,
         s3_key: s3_key,
-      });
+      })
+      }
     }
 
     const new_photos = [];
@@ -103,6 +109,13 @@ export const confirm_upload = async (req, res) => {
         url: url,
       });
     }
+
+    if(new_photos.length === 0){
+      return res.status(200).json({
+        message:"No new photos to process"
+      })
+    }
+
 
     let embeddings = []
     try{

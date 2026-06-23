@@ -59,13 +59,13 @@ export const deleteObject = async (key)=>{
     await client.send(command);
 }
 
-export const uploadDriveImage = async (stream,key,contentType)=>{
+export const uploadDriveImage = async (body,key,contentType)=>{
     const upload = new Upload({
         client,
         params:{
             Bucket:process.env.AWS_BUCKET_NAME,
             Key:key,
-            Body:stream,
+            Body:body,
             ContentType:contentType
         }
     });
