@@ -56,6 +56,7 @@ export const search_photos = async (req, res) => {
       
       const url = await getObject(s3_key)
       urls.push({
+        photo_id:id,
         get_url:url,
       });
     }

@@ -72,3 +72,11 @@ export const uploadDriveImage = async (body,key,contentType)=>{
 
     await upload.done();
 }
+
+export const GetObject = async (key)=>{
+    const command = new GetObjectCommand({
+        Bucket:process.env.AWS_BUCKET_NAME,
+        Key:key,
+    })
+    return await client.send(command)
+}

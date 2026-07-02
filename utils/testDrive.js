@@ -1,31 +1,11 @@
 import { lisFiles } from "./drive.js";
 import { getId } from "./getId.js";
-import { getfileStream } from "./drive.js";
-import { uploadDriveImage } from "./s3.js";
-import { streamToBuffer } from "./drive.js"; 
 import pool from "../config/db_config.js";
-import {v4 as uuidv4} from "uuid"
-import {convertHeicToJpeg} from "./heicConvert.js"
-
-// const id = getId(
-//   "https://drive.google.com/drive/folders/1XehHlfNSdP9IEZZ6zjaY2_JOAjybpqsc",
-// );
-
-// SINGLE FOLDER UPLAOD TO S3 DONE
-// const files = await lisFiles(id);
-// // console.log(files)
-
-// for (const img of files) {
-//   const stream = await getfileStream(img.id);
-
-//   await uploadDriveImage(stream, `drive-test/${img.id}.jpg`, img.mimeType);
-// }
-
-// console.log("upload done");
-
+import { v4 as uuidv4 } from "uuid";
+import { importQueue } from "../queues/importQueue.js";
 // NESTED FOLDER TO S3 UPLOADS:
 
-const getAllImages = async (folderId) => {
+export const getAllImages = async (folderId) => {
   let images = [];
 
   const items = await lisFiles(folderId);
@@ -60,42 +40,23 @@ export const upload_drive_url = async (req, res) => {
 
     const folderId = getId(url);
     const event_id = event.rows[0].id;
-    // console.log(folderId)
-    const images = await getAllImages(folderId);
-    let failed =0;
-    const photos = []
-    for (const img of images) {
-      try{
-        if(img.mimeType === "image/heic" || img.mimeType === "image/heif"){
-            const stream = await getfileStream(img.id);
-            const buffer = await streamToBuffer(stream);
-            const jpegBuffer = await convertHeicToJpeg(buffer);
-            await uploadDriveImage(jpegBuffer, `${event_id}/${img.id}`, "image/jpeg");
-        }else{
-            const stream = await getfileStream(img.id);
-            await uploadDriveImage(stream, `${event_id}/${img.id}`, img.mimeType);
-        }
-      photos.push({
-        photo_id: uuidv4(),
-        s3_key:`${event_id}/${img.id}`,
-        google_file_id:img.id,
-      })
-      }catch(err){
-        failed++;
-        console.log(`failed image ${img.id}`,err);
-        continue;
-      }
-    }
-    return res.status(200).json({
-        message:"Uploaded",
-        photos,
-        total:images.length,
-        failed
+    const id = uuidv4();
+    await pool.query(`insert into import_jobs (id,event_id,drive_folder_id)
+      values ($1,$2,$3)`,[id,event_id,folderId]);
+
+    await importQueue.add("driver-import",{
+      import_job_id:id,event_id,folder_id:folderId
     })
+
+    return res.status(200).json({
+      message:"Import started",
+      id
+    });
+    
   } catch (err) {
     console.log(err);
     return res.status(500).json({
-        message:"Internal server error"
-    })
+      message: "Internal server error",
+    });
   }
 };

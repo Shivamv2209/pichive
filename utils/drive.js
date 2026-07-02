@@ -18,12 +18,23 @@ const drive = google.drive({
 });
 
 export const lisFiles = async (folderId) =>{
-    const response = await drive.files.list({
+    let files =[]
+    let pageToken = undefined
+    do{
+        const response = await drive.files.list({
         q:`'${folderId}' in parents and trashed=false`,
-        fields:"files(id,name,mimeType,size)",
+        fields:"nextPageToken,files(id,name,mimeType,size)",
+        pageSize:1000,
+        pageToken
     });
 
-    return response.data.files;
+    files.push(...response.data.files)
+    pageToken = response.data.nextPageToken;
+    }while(pageToken)
+
+   console.log(`Found ${files.length} files in folder`);
+
+    return files;
 }
 
 export const getfileStream = async (fileId)=>{

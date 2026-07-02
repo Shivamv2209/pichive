@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import events_routes from "./routes/events_routes.js";
 import photo_routes from "./routes/photo_routes.js";
 import search_routes from "./routes/search_routes.js"
+import job_routes from "./routes/job_routes.js";
 import cors from "cors"
 
 dotenv.config();
@@ -17,11 +18,13 @@ app.use(cors({
     origin:[
         "https://pichive-front.vercel.app",
         "https://www.pichive.in",
+        "http://localhost:5173"
     ]
 }))
 app.use("/api/events",events_routes);
 app.use("/api/photos",photo_routes);
 app.use("/api/search",search_routes);
+app.use("/api/import_job",job_routes);
 app.get("/",(req,res)=>{
     res.send("PICHIVE backend is working")
 })
